@@ -1,28 +1,26 @@
-# Answers for Generics Lab
+# Research: IReadOnlyDictionary & SortedDictionary
 
-## Step 2 — A store for students vs. Courses
-* **What is the same:** Both `StudentStore` and `CourseStore` share the exact same logic and structure. They both use an internal list to store items and implement the same four core operations: `Add`, `GetById`, `GetAll`, and `Remove`.
-* **What is different:** The data type they operate on. One is strictly hardcoded to `Student`, while the other is hardcoded to `Course`.
-
----
-
-## Step 3 — Compiler Error on `Store<T>`
-When trying to implement `GetById(int id)` on a generic `Store<T>` before applying constraints, the compiler rejects the code with an error similar to this:
-
-> **Compiler Error:** 
-> `CS1061: 'T' does not contain a definition for 'Id' and no accessible extension method 'Id' accepting a first argument of type 'T' could be found (are you missing a using directive or an assembly reference?)`
-
-* **Why the compiler rejects it:** The compiler treats `T` as a completely unknown/generic type. Because `T` could theoretically be anything (like a `string` or a primitive type), the compiler cannot guarantee that every `T` will possess an `Id` property. Therefore, it prevents any code that tries to access `.Id` on `T` to ensure type safety.
+## 1. What is each one?
+* **`IReadOnlyDictionary<TKey, TValue>`**: An interface that represents a generic, read-only collection of key/value pairs. It provides methods to retrieve keys and values and check for keys, but it does not expose methods to add, remove, or modify items after creation.
+* **`SortedDictionary<TKey, TValue>`**: A collection of key/value pairs that are sorted automatically by key. It implements standard dictionary operations and keeps its elements ordered based on a specific `IComparer<TKey>` or the key's natural ordering.
 
 ---
 
-## Step 7 — The `new Store<()` test (Must NOT Compile)
-* **Code snippet:**
-  ```csharp
-  // var invalidStore = new Store<string>(); // must NOT compile
-Explanation: This line does not compile because Store<T> has a strict generic constraint: where T : IHasId. Since the string class does not implement the IHasId interface (it doesn't have an Id property), the compiler blocks the instantiation immediately to enforce type safety and maintain architectural rules.
+## 2. `IReadOnlyDictionary` vs. `Dictionary`
+* **How it differs**: A standard `Dictionary<TKey, TValue>` allows callers to modify its contents (add, update, or delete items). `IReadOnlyDictionary` wraps or exposes a dictionary through a read-only contract, stripping away all modification methods.
+* **Why return it from a public method**: You return an `IReadOnlyDictionary` instead of a regular `Dictionary` to protect internal state (encapsulation). It prevents external consumers from corrupting, clearing, or modifying your data directly, while still allowing them to read and query it safely.
 
-Final Question — Common Pattern Name
-What is the common name for the kind of class built in Steps 4 and 5?
+---
 
-It is commonly known as the Generic Repository Pattern (or generic data access repository), which is widely used to encapsulate data storage logic and perform CRUD operations generically across multiple entity types.
+## 3. `SortedDictionary` vs. `Dictionary`
+* **Ordering**: 
+  * A standard `Dictionary` stores keys in an unpredictable order (based on hash codes and internal bucket allocation).
+  * A `SortedDictionary` keeps its keys strictly sorted at all times (ascending by default, or based on a custom comparer).
+* **Lookup Speed**: 
+  * A standard `Dictionary` offers $O(1)$ average time complexity for lookups, insertions, and deletions using hash-based bucketing.
+  * A `SortedDictionary` relies on a self-balancing binary search tree (Red-Black tree), making lookups and operations run in $O(\log n)$ time.
+
+---
+
+## 4. When would you choose `SortedDictionary`?
+You choose a `SortedDictionary` when you explicitly need your data to remain ordered by key, or when you need efficient range-based queries (like finding all keys between X and Y, or getting the minimum/maximum keys) without having to sort the collection manually every time.
